@@ -1,4 +1,10 @@
-##Program to show EVOLUTION of VARIOUS TYPES of CRIME over the YEARS
+GeneratingHeatMaps.R
+PlottingCrimeForParticularMonthOverYears.R
+PlottingCrimeOverMonthsForDifferentYears.R
+PlottingOverallCrimeForDifferentYears.R
+PlottingSpecificCrimeForDifferentYears.R
+PlottingTypesOfCrimeOverTheYears.R
+R##Program to show EVOLUTION of VARIOUS TYPES of CRIME over the YEARS
 
 CH <- read.csv("Chicago_crime_data_cleaned.csv")   ##Read the data
 crime <- levels(CH$crime)      ##Get the unique crime types for the particular city
