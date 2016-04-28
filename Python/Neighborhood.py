@@ -10,6 +10,10 @@ def separate (path, lat, lon, lat_lim, lon_lim):
     
     #print "pd.read_csv(path,dtype=pd.DataFrame)"
     df_city = pd.read_csv(path,dtype=pd.DataFrame)
+
+    exec("df_city."+lat+".fillna(0,inplace=True)")
+    exec("df_city."+lon+".fillna(0,inplace=True)")
+    
     exec("df_X_temp = df_city."+lat)
     exec("df_Y_temp = df_city."+lon)
 
@@ -39,16 +43,16 @@ def separate (path, lat, lon, lat_lim, lon_lim):
     
     crime_per_neighborhood = [[0 for i in range(len(lat_seg)-1)] for j in range(len(lon_seg)-1)]
 
-##    print lat_seg
-##    print lon_seg
+    print lat_seg
+    print lon_seg
     print len(df_X)
     total = 0
 
 ##    print df_X
 ##    print df_Y
     
-    #for i in df_X.index.values:
-    for i in range(10):
+    for i in df_X.index.values:
+    #for i in range(10):
         flag = 0
         for j in range(len(lat_seg)-1):
             #print str(df_X[i]) + str(lat_seg[j]) + str(lat_seg[j+1])
@@ -86,10 +90,10 @@ def combined (path, coord, lat_lim, lon_lim):
     
     exec("df_X_temp = np.asarray([0.0 for i in range(len(df_city."+coord+"))])")
     exec("df_Y_temp = np.asarray([0.0 for i in range(len(df_city."+coord+"))])")
-
+    
     for i in range(len(df_X_temp)):
-        exec("df_Y_temp[i] = np.float64(df_city."+coord+"[i].split(', ')[0].split('(')[1])")
-        exec("df_X_temp[i] = np.float64(df_city."+coord+"[i].split(', ')[1].split(')')[0])")
+        exec("df_X_temp[i] = np.float64(df_city."+coord+"[i].split(', ')[0].split('(')[1])")
+        exec("df_Y_temp[i] = np.float64(df_city."+coord+"[i].split(', ')[1].split(')')[0])")
 
     df_X_temp = pd.core.series.Series(df_X_temp)
     df_Y_temp = pd.core.series.Series(df_Y_temp)
@@ -100,17 +104,17 @@ def combined (path, coord, lat_lim, lon_lim):
 ##    print df_X
 ##    print df_Y
     
-    min_lon = np.float64(pd.Series.min(df_Y[(abs(np.float64(df_Y)) > 1.0) & (abs(np.float64(df_Y)) < lon_lim)]))
-    max_lon = np.float64(pd.Series.max(df_Y[(abs(np.float64(df_Y)) > 1.0) & (abs(np.float64(df_Y)) < lon_lim)]))
+    min_lon = np.float64(df_Y[pd.Series.idxmin(abs(df_Y[(abs(np.float64(df_Y)) > 1.0) & (abs(np.float64(df_Y)) < lon_lim)]))])
+    max_lon = np.float64(df_Y[pd.Series.idxmax(abs(df_Y[(abs(np.float64(df_Y)) > 1.0) & (abs(np.float64(df_Y)) < lon_lim)]))])
 
-##    print min_lon
-##    print max_lon
+    print min_lon
+    print max_lon
     
     min_lat = np.float64(df_X[pd.Series.idxmin(abs(df_X[(abs(np.float64(df_X)) > 1.0) & (abs(np.float64(df_X)) > lat_lim)]))])
     max_lat = np.float64(df_X[pd.Series.idxmax(abs(df_X[(abs(np.float64(df_X)) > 1.0) & (abs(np.float64(df_X)) > lat_lim)]))])
 
-##    print min_lat
-##    print max_lat
+    print min_lat
+    print max_lat
     
     step_lat = (max_lat - min_lat)/10
     step_lon = (max_lon - min_lon)/10
@@ -121,10 +125,10 @@ def combined (path, coord, lat_lim, lon_lim):
     lat_seg = [i for i in np.arange(min_lat,max_lat+(step_lat/2),step_lat)]
     lon_seg = [j for j in np.arange(min_lon,max_lon+(step_lon/2),step_lon)]
     
-    crime_per_neighborhood = [[0 for i in range(len(lat_seg)-1)] for j in range(len(lon_seg)-1)]
+    crime_per_neighborhood = [[0 for i in range(len(lon_seg)-1)] for j in range(len(lat_seg)-1)]
 
-##    print lat_seg
-##    print lon_seg
+    print lat_seg
+    print lon_seg
     print len(df_X)
     total = 0
 ##
@@ -132,6 +136,7 @@ def combined (path, coord, lat_lim, lon_lim):
 ##    print df_Y
     
     for i in df_X.index.values:
+    #for i in range(10):
         flag = 0
         for j in range(len(lat_seg)-1):
             #print str(df_X[i]) + str(lat_seg[j]) + str(lat_seg[j+1])
@@ -159,9 +164,32 @@ def combined (path, coord, lat_lim, lon_lim):
     for i in range(len(lat_seg)-1):
         print crime_per_neighborhood[i]
 
+def zipcode (path, zipcode):
+    
+    df_city = pd.read_csv(path,dtype=pd.DataFrame)
+
+    exec("df_city."+zipcode+".fillna('0',inplace=True)")
+    
+    exec("df_zip_temp = df_city."+zipcode)
+
+    df_zip_temp = df_zip_temp[(df_zip_temp != '0') & (df_zip_temp != '`')]
+    df_zip = pd.Series.unique(df_zip_temp)
+
+    crime_per_neighborhood = pd.Series([[0 for i in range(2)] for j in range(len(df_zip))])
+    
+    for i in range(len(df_zip)):
+        crime_per_neighborhood[i][0] = df_zip[i]
+        crime_per_neighborhood[i][1] = 0
+
+    for i in df_zip_temp.index.values:
+        crime_per_neighborhood[int(np.where(df_zip == df_zip_temp[i])[0])][1] += 1
+
+    for i in range(len(df_zip)):
+        print crime_per_neighborhood[i]
+    
                             
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Data Mining HW1')
+    parser = argparse.ArgumentParser(description='DCrime per neighborhood Analysis')
     parser.add_argument('--path', type=str,
                             help="CSV file name",
                             required=True)
@@ -177,27 +205,39 @@ if __name__ == "__main__":
                             help="Longitude attribute name",
                             default="", 
                             required=False)
+    parser.add_argument("--zip", type=str, 
+                            help="Zipcode attribute name",
+                            default="", 
+                            required=False)
     args = parser.parse_args()
 
     if 'Baltimore' in args.path:
-        lat_lim = 70.0
+        lat_lim = 41.0
     elif 'SFO' in args.path:
-        lat_lim = 121.0
+        lat_lim = 90.0
+    elif 'Chicago' in args.path:
+        lat_lim = 39.0
     else:
-        lat_lim = 1.0
+        lat_lim = 20.0
 
     if 'Baltimore' in args.path:
-        lon_lim = 41.0
+        lon_lim = 70.0
     elif 'SFO' in args.path:
+        lon_lim = 121.0
+    elif 'Chicago' in args.path:
         lon_lim = 90.0
     else:
-        lon_lim = 90.0
+        lon_lim = 130.0
         
-    if (args.loc == "") and ((args.X == "") or (args.Y == "")):
-        print "Either both X and Y coordinates or combined coordinates required"
+    if (args.loc == "") and ((args.X == "") or (args.Y == "")) and (args.zip == ""):
+        print "Either both X and Y coordinates or combined coordinates or zipcode required"
 
     elif (args.X != "") and (args.Y != ""):
         separate(args.path,args.X,args.Y,lat_lim,lon_lim)
+        
+    elif (args.zip != ""):
+        zipcode(args.path,args.zip)
+        
     else:
         combined(args.path,args.loc,lat_lim,lon_lim)  
 
