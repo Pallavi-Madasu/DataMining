@@ -1,3 +1,3 @@
-# DataMining
+# Data Mining
 
-Working on mining the crime trends with respect to weather, impact of the movies and events on crimes.
+As part of the project, we worked on mining the crime data to analyze crime pattern for the past 15 years. We determined the effects of various external factors like weather (temperature, dew point, humidity, wind speed and so on), annual events like Super Bowl, Presidential elections, attacks like Boston Marathon Bombing, Ferguson Shooting, movies like The Departed, Django unchained on crimes. We implemented various classifiers to predict the crime type for a given set of input parameters like month of the crime, temperature and so on. In addition to this, we established safe neighborhoods based on the crime patterns observed over the years and plotted heat maps to depict the distribution of crime.
